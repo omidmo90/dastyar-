@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>دستیار هوشمند</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700&display=swap');
+:root{--bg:#0f0f0f;--bg2:#1a1a1a;--bg3:#242424;--border:#2e2e2e;--text:#e8e8e8;--text2:#888;--text3:#555;--accent:#7c6ef0;--accent2:#5a4fd4;--red:#e05555;--green:#4caf7d;--amber:#d4944a;--blue:#4a9edd}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Vazirmatn',sans-serif;font-size:15px;line-height:1.6;overflow-x:hidden}
+.app{max-width:480px;margin:0 auto;padding-bottom:70px;min-height:100vh}
+.header{padding:16px 16px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:10}
+.header h1{font-size:17px;font-weight:500}
+.time{font-size:12px;color:var(--text2)}
+.tab-bar{display:flex;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:51px;z-index:9}
+.tab{flex:1;padding:10px 4px;border:none;background:transparent;color:var(--text2);cursor:pointer;font-family:'Vazirmatn',sans-serif;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:3px;border-bottom:2px solid transparent;transition:all .15s}
+.tab .ti{font-size:18px}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.page{display:none}.page.active{display:block}
+.timer-row{margin:12px 14px 0;display:flex;gap:8px}
+.tbox{flex:1;background:var(--bg3);border-radius:10px;padding:10px 12px;border:1px solid var(--border)}
+.tbox .tl{font-size:11px;color:var(--text3);margin-bottom:2px}
+.tbox .tv{font-size:13px;font-weight:500;color:var(--amber)}
+.tbox button{font-size:11px;color:var(--accent);cursor:pointer;background:none;border:none;font-family:'Vazirmatn',sans-serif;padding:0;margin-top:3px;display:block}
+.loc-banner{margin:10px 14px 0;background:var(--bg2);border:1px solid var(--border);border-radius:13px;padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:border-color .2s}
+.loc-banner:hover{border-color:var(--accent)}
+.li-icon{width:34px;height:34px;border-radius:9px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.li-text{flex:1}.li-label{font-size:11px;color:var(--text3)}.li-name{font-size:14px;font-weight:500}
+.li-arr{font-size:12px;color:var(--accent)}
+.loc-hint{margin:8px 14px 0;background:rgba(124,110,240,.08);border:1px solid rgba(124,110,240,.2);border-radius:11px;padding:10px 13px;font-size:13px;color:var(--accent);display:none}
+.loc-hint.show{display:block}
+.vwrap{margin:12px 14px 0}
+.vcard{background:var(--bg2);border:1px solid var(--border);border-radius:15px;padding:14px}
+.vtop{display:flex;gap:11px;align-items:center;margin-bottom:11px}
+.mic{width:50px;height:50px;border-radius:50%;border:1.5px solid var(--border);background:var(--bg3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:21px;transition:all .2s;flex-shrink:0;position:relative}
+.mic.rec{border-color:var(--red);background:rgba(224,85,85,.12)}
+.mic.rec::after{content:'';position:absolute;width:50px;height:50px;border-radius:50%;border:1.5px solid var(--red);animation:ripple 1s ease-out infinite}
+@keyframes ripple{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.7);opacity:0}}
+.vml{font-size:12px;color:var(--text2)}.vms{font-size:14px;font-weight:500}
+.tx{font-size:14px;color:var(--text2);min-height:38px;border-top:1px solid var(--border);padding-top:9px;line-height:1.7;outline:none}
+.tx.ht{color:var(--text)}
+.srow{display:flex;gap:7px;margin-top:9px}
+.sbtn{flex:1;background:var(--accent);border:none;color:white;border-radius:9px;padding:9px;font-family:'Vazirmatn',sans-serif;font-size:14px;cursor:pointer}
+.sbtn:disabled{opacity:.4;cursor:not-allowed}
+.cbtn{background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:9px;padding:9px 13px;font-family:'Vazirmatn',sans-serif;font-size:14px;cursor:pointer}
+.abubble{margin:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:13px 15px;font-size:14px;line-height:1.7;display:none}
+.abubble.show{display:block}
+.dots{display:flex;gap:4px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:bn 1.2s infinite}
+.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+@keyframes bn{0%,80%,100%{transform:scale(.6);opacity:.4}40%{transform:scale(1);opacity:1}}
+.sec{margin:14px 14px 0}
+.sechd{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.sect{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.07em}
+.secc{font-size:11px;color:var(--accent)}
+.tcard{background:var(--bg2);border:1px solid var(--border);border-radius:13px;padding:13px;margin-bottom:7px}
+.tcard.dn{opacity:.45}
+.tcrow{display:flex;align-items:flex-start;gap:9px}
+.tck{width:21px;height:21px;border:1.5px solid var(--border);border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;transition:all .15s;font-size:11px}
+.tck:hover{border-color:var(--accent)}
+.tcard.dn .tck{background:var(--accent);border-color:var(--accent);color:white}
+.tbd{flex:1}
+.ttt{font-size:14px;font-weight:500;margin-bottom:3px}
+.twy{font-size:12px;color:var(--text2);margin-bottom:5px}
+.tft{display:flex;gap:5px;flex-wrap:wrap}
+.badge{font-size:11px;padding:2px 8px;border-radius:18px;border:1px solid var(--border);color:var(--text2)}
+.badge.sh{border-color:rgba(76,175,125,.4);color:var(--green)}
+.badge.sm{border-color:rgba(212,148,74,.4);color:var(--amber)}
+.badge.sl{color:var(--text3)}.badge.cat{background:var(--bg3)}
+.badge.corr{border-color:rgba(124,110,240,.35);color:var(--accent)}
+.badge.lt{border-color:rgba(74,158,221,.35);color:var(--blue)}
+.pcard{margin:10px 14px 0;border-radius:14px;border:1px solid var(--border);overflow:hidden;display:none}
+.pcard.show{display:block}
+.phd{background:var(--bg3);padding:11px 15px;display:flex;align-items:center;gap:9px}
+.pulse{width:8px;height:8px;border-radius:50%;background:var(--green);animation:gw 2s ease-in-out infinite;flex-shrink:0}
+@keyframes gw{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(76,175,125,.4)}50%{opacity:.7;box-shadow:0 0 0 5px rgba(76,175,125,0)}}
+.phd span{font-size:13px;font-weight:500}
+.pbd{background:var(--bg2);padding:13px 15px}
+.pq{font-size:14px;color:var(--text);margin-bottom:11px;line-height:1.6}
+.rrow{display:flex;gap:7px;margin-bottom:11px;flex-wrap:wrap}
+.rbtn{flex:1;min-width:55px;padding:8px 4px;border-radius:9px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;font-size:13px;font-family:'Vazirmatn',sans-serif;text-align:center;transition:all .15s}
+.rbtn.sel{border-color:var(--accent);background:rgba(124,110,240,.12);color:var(--accent)}
+.rbtn.sel.good{border-color:var(--green);background:rgba(76,175,125,.12);color:var(--green)}
+.rbtn.sel.bad{border-color:var(--red);background:rgba(224,85,85,.12);color:var(--red)}
+.pta{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:9px 11px;color:var(--text);font-family:'Vazirmatn',sans-serif;font-size:13px;resize:none;margin-bottom:9px}
+.pta:focus{outline:none;border-color:var(--accent)}
+.psub{background:var(--accent);border:none;color:white;border-radius:9px;padding:9px 18px;font-family:'Vazirmatn',sans-serif;font-size:14px;cursor:pointer;width:100%}
+.icard{margin:10px 14px 0;background:var(--bg2);border:1px solid rgba(76,175,125,.22);border-radius:13px;padding:13px 15px;display:none}
+.icard.show{display:block}
+.ititle{font-size:11px;font-weight:500;color:var(--green);letter-spacing:.06em;margin-bottom:7px}
+.itext{font-size:13px;color:var(--text);line-height:1.7}
+.fbcard{margin:10px 14px 0;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px;display:none}
+.fbcard.show{display:block}
+.fbcard h3{font-size:15px;font-weight:500;margin-bottom:6px}
+.fbq{font-size:13px;color:var(--text2);margin-bottom:9px}
+.fbcard textarea{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:9px 11px;color:var(--text);font-family:'Vazirmatn',sans-serif;font-size:13px;resize:none}
+.fbcard textarea:focus{outline:none;border-color:var(--accent)}
+.fbcard button{margin-top:9px;background:var(--accent);border:none;color:white;border-radius:9px;padding:9px 18px;font-family:'Vazirmatn',sans-serif;font-size:14px;cursor:pointer}
+.tltabs{display:flex;gap:6px;padding:14px 14px 0}
+.tltab{flex:1;padding:8px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;font-family:'Vazirmatn',sans-serif;font-size:13px;text-align:center;transition:all .15s}
+.tltab.active{background:var(--accent);border-color:var(--accent);color:white}
+.tlpage{display:none;padding:12px 14px}.tlpage.active{display:block}
+.aform{background:var(--bg2);border:1px solid var(--border);border-radius:13px;padding:13px;margin-bottom:12px}
+.aform textarea{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:9px 11px;color:var(--text);font-family:'Vazirmatn',sans-serif;font-size:14px;resize:none;margin-bottom:8px}
+.aform textarea:focus{outline:none;border-color:var(--accent)}
+.afrow{display:flex;gap:7px;flex-wrap:wrap}
+.afsel{flex:1;min-width:100px;background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:8px 10px;color:var(--text);font-family:'Vazirmatn',sans-serif;font-size:13px}
+.afsel:focus{outline:none;border-color:var(--accent)}
+.afbtn{background:var(--accent);border:none;color:white;border-radius:9px;padding:8px 16px;font-family:'Vazirmatn',sans-serif;font-size:13px;cursor:pointer;white-space:nowrap}
+.iitem{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px 13px;margin-bottom:7px;display:flex;align-items:flex-start;gap:9px}
+.iitem.doneitem{opacity:.4}
+.icheck{width:20px;height:20px;border:1.5px solid var(--border);border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:3px;transition:all .15s;font-size:11px}
+.icheck:hover{border-color:var(--accent)}
+.doneitem .icheck{background:var(--accent);border-color:var(--accent);color:white}
+.ibody{flex:1}.ititl{font-size:14px;font-weight:500;line-height:1.4}
+.imeta{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+.idel{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:0 4px;flex-shrink:0}
+.idel:hover{color:var(--red)}
+.fbadge{font-size:11px;padding:2px 8px;border-radius:18px;background:rgba(212,148,74,.12);border:1px solid rgba(212,148,74,.3);color:var(--amber)}
+.ltbadge{font-size:11px;padding:2px 8px;border-radius:18px;background:rgba(74,158,221,.1);border:1px solid rgba(74,158,221,.3);color:var(--blue)}
+.patbanner{background:rgba(212,148,74,.08);border:1px solid rgba(212,148,74,.2);border-radius:11px;padding:10px 13px;margin-bottom:10px;font-size:13px;color:var(--amber)}
+.patt{font-size:11px;font-weight:500;letter-spacing:.05em;margin-bottom:4px;opacity:.8}
+.inspage{padding:14px}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.sbox{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center}
+.snum{font-size:26px;font-weight:500;color:var(--accent)}
+.slbl{font-size:12px;color:var(--text2);margin-top:2px}
+.phist{background:var(--bg2);border:1px solid var(--border);border-radius:13px;padding:13px;margin-bottom:12px}
+.phtit{font-size:12px;font-weight:500;color:var(--text3);letter-spacing:.06em;margin-bottom:10px}
+.phrow{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--border)}
+.phrow:last-child{border-bottom:none}
+.phdot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.phdot.good{background:var(--green)}.phdot.mid{background:var(--amber)}.phdot.bad{background:var(--red)}
+.phtxt{flex:1;font-size:12px;color:var(--text2);line-height:1.5}
+.phtime{font-size:11px;color:var(--text3);white-space:nowrap}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--bg2);border-top:1px solid var(--border);display:flex;z-index:20}
+.bnav{flex:1;padding:10px 6px 12px;border:none;background:transparent;color:var(--text2);cursor:pointer;font-family:'Vazirmatn',sans-serif;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:3px;transition:color .15s}
+.bnav .bi{font-size:20px}.bnav.active{color:var(--accent)}
+.moverlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.moverlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--bg2);border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:20px;border-top:1px solid var(--border);transform:translateY(40px);transition:transform .25s;max-height:80vh;overflow-y:auto}
+.moverlay.open .modal{transform:translateY(0)}
+.modal h2{font-size:16px;font-weight:500;margin-bottom:13px}
+.loclistm{display:flex;flex-direction:column;gap:7px;margin-bottom:10px}
+.locitem{background:var(--bg3);border:1px solid var(--border);border-radius:11px;padding:11px 13px;cursor:pointer;display:flex;align-items:center;gap:9px;transition:border-color .15s}
+.locitem:hover,.locitem.active{border-color:var(--accent)}
+.locitem .lem{font-size:19px}.locitem .linf{flex:1}
+.locitem .linf strong{font-size:14px;display:block}.locitem .linf span{font-size:12px;color:var(--text2)}
+.locitem .lchk{color:var(--accent);display:none}.locitem.active .lchk{display:block}
+.nlrow{display:flex;gap:7px;margin-top:10px}
+.nlrow input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:9px 13px;color:var(--text);font-family:'Vazirmatn',sans-serif;font-size:14px}
+.nlrow input:focus{outline:none;border-color:var(--accent)}
+.nlrow button{background:var(--accent);border:none;color:white;border-radius:9px;padding:9px 15px;font-family:'Vazirmatn',sans-serif;font-size:14px;cursor:pointer}
+
+.setup-screen{position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px}
+.setup-box{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px 24px;width:100%;max-width:400px}
+.setup-box h2{font-size:20px;font-weight:500;margin-bottom:8px}
+.setup-box p{font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.7}
+.setup-box input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-family:'Vazirmatn',sans-serif;font-size:14px;margin-bottom:12px}
+.setup-box input:focus{outline:none;border-color:var(--accent)}
+.setup-box button{width:100%;background:var(--accent);border:none;color:white;border-radius:10px;padding:12px;font-family:'Vazirmatn',sans-serif;font-size:15px;cursor:pointer}
+.setup-box .hint{font-size:12px;color:var(--text3);margin-top:10px;text-align:center;line-height:1.6}
+.setup-box a{color:var(--accent);text-decoration:none}
+
+</style>
+</head>
+<body>
+<div class="app">
+<div class="header">
+  <h1>دستیار هوشمند</h1>
+  <span class="time" id="htime"></span><button onclick="document.getElementById('setupScreen').style.display='flex'" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:0 0 0 8px" title="تنظیمات">⚙️</button>
+</div>
+<div class="tab-bar">
+  <button class="tab active" onclick="showPage('home',this)"><span class="ti">🏠</span><span>خانه</span></button>
+  <button class="tab" onclick="showPage('tasks',this)"><span class="ti">📋</span><span>لیست کارها</span></button>
+  <button class="tab" onclick="showPage('insights',this);renderInsights()"><span class="ti">📊</span><span>بینش‌ها</span></button>
+</div>
+
+<!-- HOME -->
+<div class="page active" id="page-home">
+  <div class="timer-row">
+    <div class="tbox"><div class="tl">📍 موقعیت</div><div class="tv" id="locTimer">--:--</div><button onclick="openLocModal()">چک‌این کن</button></div>
+    <div class="tbox"><div class="tl">⚡ بازدهی</div><div class="tv" id="prodTimer">--:--</div><button onclick="showProd()">گزارش بده</button></div>
+  </div>
+  <div class="loc-banner" onclick="openLocModal()">
+    <div class="li-icon" id="locIcon">📍</div>
+    <div class="li-text"><div class="li-label">موقعیت فعلی</div><div class="li-name" id="locName">مشخص نشده</div></div>
+    <div class="li-arr">تغییر ←</div>
+  </div>
+  <div class="loc-hint" id="locHint"></div>
+  <div class="vwrap">
+    <div class="vcard">
+      <div class="vtop">
+        <button class="mic" id="micBtn" onclick="toggleMic()">🎤</button>
+        <div><div class="vml">بهم بگو چی داری در ذهنت</div><div class="vms" id="micSt">آماده</div></div>
+      </div>
+      <div class="tx" id="tx" contenteditable="true">صحبت کن یا تایپ کن...</div>
+      <div class="srow">
+        <button class="sbtn" id="sndBtn" onclick="processInput()" disabled>ارسال →</button>
+        <button class="cbtn" onclick="clearInput()">پاک</button>
+      </div>
+    </div>
+  </div>
+  <div class="abubble" id="abubble"></div>
+  <div class="sec" id="aiSec" style="display:none">
+    <div class="sechd"><div class="sect">اولویت‌بندی امروز</div><div class="secc" id="aiCnt"></div></div>
+    <div id="aiList"></div>
+  </div>
+  <div class="pcard" id="pcard">
+    <div class="phd"><div class="pulse"></div><span id="pstep">چک‌این بازدهی</span></div>
+    <div class="pbd">
+      <div class="pq" id="pq">الان داری چیکار می‌کنی؟</div>
+      <div class="rrow" id="rrow" style="display:none">
+        <button class="rbtn good" onclick="pickR('خوب',this)">خوب 😊</button>
+        <button class="rbtn" onclick="pickR('متوسط',this)">متوسط 😐</button>
+        <button class="rbtn bad" onclick="pickR('بد',this)">بد 😔</button>
+      </div>
+      <textarea class="pta" id="pta" rows="2" placeholder="بنویس..."></textarea>
+      <button class="psub" onclick="nextProd()">ادامه →</button>
+    </div>
+  </div>
+  <div class="icard" id="icard"><div class="ititle">💡 بینش دستیار</div><div class="itext" id="itext"></div></div>
+  <div class="fbcard" id="fbcard">
+    <h3>🌙 بررسی شبانه</h3>
+    <div class="fbq" id="fbq"></div>
+    <textarea id="fbinp" rows="3" placeholder="صادقانه بگو..."></textarea>
+    <button onclick="submitFb()">ارسال و تحلیل →</button>
+  </div>
+</div>
+
+<!-- TASKS -->
+<div class="page" id="page-tasks">
+  <div class="tltabs">
+    <button class="tltab active" onclick="showTlTab('daily',this)">روزمره</button>
+    <button class="tltab" onclick="showTlTab('longterm',this)">بلندمدت</button>
+  </div>
+  <div class="tlpage active" id="tl-daily">
+    <div class="aform">
+      <textarea id="dinp" rows="2" placeholder="یه کار روزمره... (مثلاً: خرید نان، ورزش، ایمیل استاد)"></textarea>
+      <div class="afrow">
+        <select class="afsel" id="dcat"><option>خرید</option><option>کار</option><option>درس</option><option>سلامت</option><option>خانه</option><option>دیگر</option></select>
+        <select class="afsel" id="dfreq"><option value="یک‌بار">یک‌بار</option><option value="روزانه">روزانه</option><option value="هفتگی">هفتگی</option><option value="ماهانه">ماهانه</option></select>
+        <button class="afbtn" onclick="addDaily()">افزودن +</button>
+      </div>
+    </div>
+    <div id="patBanner" style="display:none"></div>
+    <div id="dailyList"></div>
+  </div>
+  <div class="tlpage" id="tl-longterm">
+    <div class="aform">
+      <textarea id="ltinp" rows="2" placeholder="یه هدف بلندمدت... (مثلاً: نوشتن پایان‌نامه، آمادگی دکترا)"></textarea>
+      <div class="afrow">
+        <select class="afsel" id="ltcat"><option>تحصیل</option><option>کار</option><option>مالی</option><option>سلامت</option><option>شخصی</option></select>
+        <select class="afsel" id="ltpri"><option value="بالا">اولویت بالا</option><option value="متوسط">متوسط</option><option value="پایین">پایین</option></select>
+        <button class="afbtn" onclick="addLt()">افزودن +</button>
+      </div>
+    </div>
+    <div id="ltList"></div>
+    <div style="margin:8px 0;text-align:center">
+      <button onclick="startWeekReview()" style="background:none;border:1px solid var(--border);color:var(--text2);border-radius:9px;padding:9px 18px;font-family:'Vazirmatn',sans-serif;font-size:13px;cursor:pointer">بررسی هفتگی اهداف →</button>
+    </div>
+  </div>
+</div>
+
+<!-- INSIGHTS -->
+<div class="page" id="page-insights">
+  <div class="inspage">
+    <div class="sgrid" id="sgrid"></div>
+    <div class="phist" id="phist" style="display:none"><div class="phtit">تاریخچه بازدهی</div><div id="phrows"></div></div>
+    <div class="icard show" id="winsight" style="margin:0 0 12px"><div class="ititle">📊 خلاصه الگوها</div><div class="itext" id="wtext">وقتی چند چک‌این داشتی، اینجا الگوهات رو می‌بینی.</div></div>
+  </div>
+</div>
+
+<div class="setup-screen" id="setupScreen" style="display:none">
+  <div class="setup-box">
+    <h2>👋 خوش اومدی!</h2>
+    <p>برای شروع، API key جمینای رو وارد کن. یه بار کافیه — بعدش همه چیز کار می‌کنه.</p>
+    <input type="text" id="keyInput" placeholder="AIza..." />
+    <button onclick="saveKey()">شروع کن →</button>
+    <div class="hint">
+      key رو از <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a> بگیر<br>
+      رایگانه — فقط یه Google account لازم داری
+    </div>
+  </div>
+</div>
+
+
+</div>
+
+<!-- Location Modal -->
+<div class="moverlay" id="locModal" onclick="closeMBg(event,'locModal')">
+  <div class="modal">
+    <h2>الان کجایی؟</h2>
+    <div class="loclistm" id="loclistm"></div>
+    <div class="nlrow"><input type="text" id="nlinp" placeholder="جای جدید..."/><button onclick="addLoc()">افزودن</button></div>
+  </div>
+</div>
+
+<!-- Weekly Review Modal -->
+<div class="moverlay" id="wkModal" onclick="closeMBg(event,'wkModal')">
+  <div class="modal" id="wkBody"><h2>📅 بررسی هفتگی اهداف بلندمدت</h2></div>
+</div>
+
+<div class="bottom-nav">
+  <button class="bnav active" id="bn-home" onclick="showPage('home',null);setNav('bn-home')"><span class="bi">🏠</span><span>خانه</span></button>
+  <button class="bnav" id="bn-tasks" onclick="showPage('tasks',null);setNav('bn-tasks')"><span class="bi">📋</span><span>لیست</span></button>
+  <button class="bnav" id="bn-night" onclick="showNight()"><span class="bi">🌙</span><span>شب</span></button>
+  <button class="bnav" id="bn-ins" onclick="showPage('insights',null);setNav('bn-ins');renderInsights()"><span class="bi">📊</span><span>بینش</span></button>
+</div>
+
+<script>
+const LOC_INT=180,PROD_INT=120;
+
+// ── Gemini API ──
+function getKey(){return localStorage.getItem('gemini_key')||'';}
+async function callAI(sysP,userMsg,maxTok=1200){
+  const key=getKey();if(!key){showKeyPrompt();throw new Error('no key');}
+  const url=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
+  const body={systemInstruction:{parts:[{text:sysP}]},contents:[{role:'user',parts:[{text:userMsg}]}],generationConfig:{maxOutputTokens:maxTok,temperature:0.7}};
+  const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!r.ok){const e=await r.json();throw new Error(e.error?.message||'API error');}
+  const d=await r.json();return d.candidates?.[0]?.content?.parts?.[0]?.text||'';
+}
+async function callAIConv(sysP,messages,maxTok=1200){
+  const key=getKey();if(!key){showKeyPrompt();throw new Error('no key');}
+  const url=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
+  const contents=messages.map(m=>({role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]}));
+  const body={systemInstruction:{parts:[{text:sysP}]},contents,generationConfig:{maxOutputTokens:maxTok,temperature:0.7}};
+  const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!r.ok){const e=await r.json();throw new Error(e.error?.message||'API error');}
+  const d=await r.json();return d.candidates?.[0]?.content?.parts?.[0]?.text||'';
+}
+function showKeyPrompt(){
+  const k=prompt('API Key جمینایت رو وارد کن (از aistudio.google.com):');
+  if(k&&k.trim()){localStorage.setItem('gemini_key',k.trim());alert('ذخیره شد! دوباره امتحان کن.');}
+}
+let S=JSON.parse(localStorage.getItem('ds3')||'null')||{
+  locs:[{id:1,e:'🏠',n:'خونه'},{id:2,e:'🏫',n:'دانشگاه'},{id:3,e:'🏙️',n:'شهر / بیرون'}],
+  curLoc:null,aiTasks:[],daily:[],lt:[],logs:[],hist:[],
+  nxtLoc:null,nxtProd:null,lastWk:null
+};
+const save=()=>localStorage.setItem('ds3',JSON.stringify(S));
+const SYS=`تو یک دستیار هوشمند مدیریت کارها هستی. به فارسی صحبت می‌کنی.
+وقتی کاربر اطلاعاتی می‌ده:
+۱. کارها رو استخراج کن ۲. کورلیشن پیدا کن ۳. مکان‌های مناسب هر کار رو مشخص کن ۴. اولویت‌بندی کن
+پاسخ کوتاه (۲-۳ جمله) بده سپس حتما این JSON رو برگردون:
+TASKS_JSON:[{"title":"عنوان","urgency":8,"importance":9,"value":7,"score":82,"category":"تحصیل","correlation":"","locations":["خونه"],"why":"دلیل","isLongTerm":false}]
+score=round((urgency*0.3+importance*0.4+value*0.3)*10)`;
+
+setInterval(()=>{document.getElementById('htime').textContent=new Date().toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'})},1000);
+document.getElementById('htime').textContent=new Date().toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'});
+
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(btn&&btn.classList.contains('tab'))btn.classList.add('active');
+  if(id==='tasks'){renderDaily();renderLt();detectPatterns();}
+}
+function setNav(id){document.querySelectorAll('.bnav').forEach(b=>b.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function showTlTab(id,btn){
+  document.querySelectorAll('.tltab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tlpage').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');document.getElementById('tl-'+id).classList.add('active');
+}
+function fmtDiff(ms){if(ms<=0)return'الان!';const h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000);return`${h}:${String(m).padStart(2,'0')}`;}
+function tickTimers(){
+  const ld=S.nxtLoc?new Date(S.nxtLoc)-new Date():-1;
+  const pd=S.nxtProd?new Date(S.nxtProd)-new Date():-1;
+  document.getElementById('locTimer').textContent=ld<0?'تنظیم نشده':fmtDiff(ld);
+  document.getElementById('prodTimer').textContent=pd<0?'تنظیم نشده':fmtDiff(pd);
+  if(ld<=0&&S.nxtLoc&&!window._lp){window._lp=true;if(confirm('وقت چک‌این موقعیته!'))openLocModal();}
+  if(pd<=0&&S.nxtProd&&!window._pp){window._pp=true;showProd();}
+}
+setInterval(tickTimers,30000);tickTimers();
+
+function openLocModal(){
+  document.getElementById('loclistm').innerHTML=S.locs.map(l=>`<div class="locitem ${S.curLoc?.id===l.id?'active':''}" onclick="selLoc(${l.id})"><span class="lem">${l.e}</span><div class="linf"><strong>${l.n}</strong><span>انتخاب کن</span></div><span class="lchk">✓</span></div>`).join('');
+  document.getElementById('locModal').classList.add('open');
+}
+function closeMBg(e,id){if(e.target===document.getElementById(id))document.getElementById(id).classList.remove('open');}
+function selLoc(id){
+  S.curLoc=S.locs.find(l=>l.id===id);
+  S.nxtLoc=new Date(Date.now()+LOC_INT*60000).toISOString();
+  if(!S.nxtProd)S.nxtProd=new Date(Date.now()+PROD_INT*60000).toISOString();
+  window._lp=false;save();
+  document.getElementById('locModal').classList.remove('open');
+  document.getElementById('locIcon').textContent=S.curLoc.e;
+  document.getElementById('locName').textContent=S.curLoc.n;
+  showLocHint();tickTimers();
+}
+function addLoc(){
+  const v=document.getElementById('nlinp').value.trim();if(!v)return;
+  const ems=['🏢','🏪','🏋️','🌳','🚗','🏥','🍽️'];
+  const l={id:Date.now(),e:ems[Math.floor(Math.random()*ems.length)],n:v};
+  S.locs.push(l);save();document.getElementById('nlinp').value='';
+  document.getElementById('locModal').classList.remove('open');
+  setTimeout(()=>{openLocModal();selLoc(l.id);},100);
+}
+function showLocHint(){
+  if(!S.curLoc)return;
+  const nm=S.curLoc.n;
+  const rel=S.aiTasks.filter(t=>!t.done&&t.locations&&t.locations.includes(nm));
+  const el=document.getElementById('locHint');
+  if(rel.length){el.textContent=`📍 الان که ${nm}ی: ${rel.map(t=>t.title).join(' — ')}`;el.classList.add('show');}
+  else el.classList.remove('show');
+}
+
+let rec=null,isRec=false,recTxt='';
+function toggleMic(){
+  const el=document.getElementById('tx');
+  if(!('webkitSpeechRecognition'in window)&&!('SpeechRecognition'in window)){el.textContent='';el.classList.add('ht');el.focus();return;}
+  isRec?stopRec():startRec();
+}
+function startRec(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  rec=new SR();rec.lang='fa-IR';rec.continuous=true;rec.interimResults=true;recTxt='';
+  rec.onresult=e=>{let f='',i='';for(let x=e.resultIndex;x<e.results.length;x++)e.results[x].isFinal?f+=e.results[x][0].transcript+' ':i+=e.results[x][0].transcript;recTxt+=f;const el=document.getElementById('tx');el.textContent=recTxt+i;el.classList.add('ht');document.getElementById('sndBtn').disabled=false;};
+  rec.onerror=stopRec;rec.start();isRec=true;
+  document.getElementById('micBtn').classList.add('rec');document.getElementById('micBtn').textContent='⏹';document.getElementById('micSt').textContent='در حال ضبط...';
+}
+function stopRec(){if(rec)rec.stop();isRec=false;document.getElementById('micBtn').classList.remove('rec');document.getElementById('micBtn').textContent='🎤';document.getElementById('micSt').textContent='آماده';}
+function clearInput(){recTxt='';const el=document.getElementById('tx');el.textContent='صحبت کن یا تایپ کن...';el.classList.remove('ht');document.getElementById('sndBtn').disabled=true;stopRec();}
+document.getElementById('tx').addEventListener('input',function(){document.getElementById('sndBtn').disabled=!this.textContent.trim();});
+
+async function processInput(){
+  const el=document.getElementById('tx');const text=el.textContent.trim();
+  if(!text||text==='صحبت کن یا تایپ کن...')return;stopRec();
+  const ltCtx=S.lt.length?`\n[اهداف بلندمدت: ${S.lt.map(t=>t.title).join(' | ')}]`:'';
+  const dCtx=S.daily.filter(t=>!t.done).length?`\n[کارهای روزمره باقی‌مانده: ${S.daily.filter(t=>!t.done).map(t=>t.title).join(' | ')}]`:'';
+  const lCtx=S.curLoc?`\n[موقعیت: ${S.curLoc.n}]`:'';
+  const full=text+lCtx+ltCtx+dCtx;
+  document.getElementById('sndBtn').disabled=true;
+  const b=document.getElementById('abubble');b.classList.add('show');
+  b.innerHTML='<div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+  S.hist.push({role:'user',content:full});
+  try{
+    const c=await callAIConv(SYS,S.hist,1200);S.hist.push({role:'assistant',content:c});
+    const jm=c.match(/TASKS_JSON:(\[[\s\S]*?\])/);const prose=c.replace(/TASKS_JSON:[\s\S]*/,'').trim();
+    b.textContent=prose;
+    if(jm){try{const nt=JSON.parse(jm[1]);nt.forEach(n=>{const i=S.aiTasks.findIndex(t=>t.title===n.title);i>=0?S.aiTasks[i]={...S.aiTasks[i],...n}:S.aiTasks.push({...n,done:false,id:Date.now()+Math.random()});});S.aiTasks.sort((a,b)=>b.score-a.score);save();renderAi();showLocHint();}catch(e){}}
+  }catch(e){b.textContent='خطا در اتصال.';}
+  document.getElementById('sndBtn').disabled=false;
+}
+function renderAi(){
+  const p=S.aiTasks.filter(t=>!t.done),d=S.aiTasks.filter(t=>t.done);
+  if(!S.aiTasks.length){document.getElementById('aiSec').style.display='none';return;}
+  document.getElementById('aiSec').style.display='block';
+  document.getElementById('aiCnt').textContent=`${p.length} در انتظار`;
+  document.getElementById('aiList').innerHTML=[...p,...d].map(t=>{
+    const sc=t.score>=75?'sh':t.score>=50?'sm':'sl';const ls=(t.locations||[]).join(' · ');
+    return`<div class="tcard ${t.done?'dn':''}"><div class="tcrow"><div class="tck" onclick="togAi('${t.id}')">${t.done?'✓':''}</div><div class="tbd"><div class="ttt">${t.title}${t.isLongTerm?' <span class="badge lt">بلندمدت</span>':''}</div>${t.why?`<div class="twy">${t.why}</div>`:''}<div class="tft"><span class="badge ${sc}">${Math.round(t.score)}</span><span class="badge cat">${t.category}</span>${t.correlation?`<span class="badge corr">↔ ${t.correlation}</span>`:''}${ls?`<span class="badge">📍 ${ls}</span>`:''}</div></div></div></div>`;
+  }).join('');
+}
+function togAi(id){const t=S.aiTasks.find(t=>String(t.id)===String(id));if(t){t.done=!t.done;save();renderAi();}}
+
+function addDaily(){
+  const v=document.getElementById('dinp').value.trim();if(!v)return;
+  S.daily.push({id:Date.now(),title:v,cat:document.getElementById('dcat').value,freq:document.getElementById('dfreq').value,done:false,addedAt:new Date().toISOString(),completions:[]});
+  document.getElementById('dinp').value='';save();renderDaily();detectPatterns();
+}
+function togDaily(id){const t=S.daily.find(t=>String(t.id)===String(id));if(!t)return;t.done=!t.done;if(t.done)t.completions=[...(t.completions||[]),new Date().toISOString()];save();renderDaily();}
+function delDaily(id){S.daily=S.daily.filter(t=>String(t.id)!==String(id));save();renderDaily();}
+function renderDaily(){
+  const el=document.getElementById('dailyList');
+  if(!S.daily.length){el.innerHTML='<div style="text-align:center;padding:24px;color:var(--text3);font-size:13px">هنوز کاری اضافه نکردی</div>';return;}
+  el.innerHTML=S.daily.map(t=>`<div class="iitem ${t.done?'doneitem':''}"><div class="icheck" onclick="togDaily('${t.id}')">${t.done?'✓':''}</div><div class="ibody"><div class="ititl">${t.title}</div><div class="imeta"><span class="badge cat">${t.cat}</span>${t.freq!=='یک‌بار'?`<span class="fbadge">${t.freq}</span>`:''}</div></div><button class="idel" onclick="delDaily('${t.id}')">×</button></div>`).join('');
+}
+
+function detectPatterns(){
+  const banner=document.getElementById('patBanner');const pats=[];
+  const cc={};S.daily.forEach(t=>{cc[t.cat]=(cc[t.cat]||0)+1;});
+  Object.entries(cc).forEach(([c,n])=>{if(n>=3)pats.push(`${n} کار ${c} داری — شاید بشه ترکیب کرد`);});
+  const wk=S.daily.filter(t=>t.freq==='هفتگی');
+  if(wk.length)pats.push(`کارهای هفتگی: ${wk.map(t=>t.title).join('، ')}`);
+  const dy=S.daily.filter(t=>t.freq==='روزانه');
+  if(dy.length)pats.push(`کارهای روزانه: ${dy.map(t=>t.title).join('، ')}`);
+  if(pats.length){banner.style.display='block';banner.innerHTML=`<div class="patt">🔁 الگوهای تکراری</div>${pats.map(p=>`<div style="margin-top:3px">${p}</div>`).join('')}`;}
+  else banner.style.display='none';
+}
+
+function addLt(){
+  const v=document.getElementById('ltinp').value.trim();if(!v)return;
+  S.lt.push({id:Date.now(),title:v,cat:document.getElementById('ltcat').value,pri:document.getElementById('ltpri').value,addedAt:new Date().toISOString(),updates:[]});
+  document.getElementById('ltinp').value='';save();renderLt();
+}
+function delLt(id){S.lt=S.lt.filter(t=>String(t.id)!==String(id));save();renderLt();}
+function renderLt(){
+  const el=document.getElementById('ltList');
+  if(!S.lt.length){el.innerHTML='<div style="text-align:center;padding:24px;color:var(--text3);font-size:13px">هنوز هدفی اضافه نکردی</div>';return;}
+  el.innerHTML=S.lt.map(t=>{const sc=t.pri==='بالا'?'sh':t.pri==='متوسط'?'sm':'sl';const lu=t.updates?.slice(-1)[0];return`<div class="iitem"><div class="ibody"><div class="ititl">${t.title}</div><div class="imeta"><span class="badge cat">${t.cat}</span><span class="badge ${sc}">${t.pri}</span>${lu?`<span class="badge" style="color:var(--text3)">آخرین آپدیت: ${new Date(lu.time).toLocaleDateString('fa-IR')}</span>`:''}</div></div><button class="idel" onclick="delLt('${t.id}')">×</button></div>`;}).join('');
+}
+
+let wkIdx=0,wkAns=[];
+function startWeekReview(){
+  if(!S.lt.length){alert('هنوز هدف بلندمدتی اضافه نکردی!');return;}
+  wkIdx=0;wkAns=[];showWkStep();
+}
+function showWkStep(){
+  const modal=document.getElementById('wkModal');modal.classList.add('open');
+  const body=document.getElementById('wkBody');
+  if(wkIdx>=S.lt.length){body.innerHTML='<h2>📅 بررسی هفتگی</h2><p style="color:var(--text2);font-size:14px;margin-bottom:12px">ممنون! در حال تحلیل...</p>';setTimeout(()=>{modal.classList.remove('open');analyzeWeek();},400);return;}
+  const t=S.lt[wkIdx];
+  body.innerHTML=`<h2>📅 بررسی هفتگی</h2>
+<div style="background:var(--bg3);border-radius:10px;padding:10px 13px;margin-bottom:12px"><div style="font-size:11px;color:var(--text3);margin-bottom:3px">${wkIdx+1} از ${S.lt.length}</div><div style="font-size:15px;font-weight:500">${t.title}</div><div style="font-size:12px;color:var(--text2);margin-top:3px">${t.cat} — اولویت ${t.pri}</div></div>
+<div style="font-size:14px;color:var(--text2);margin-bottom:10px">این هفته روی این کار چقدر پیشرفت داشتی؟</div>
+<div style="display:flex;gap:7px;margin-bottom:12px">
+  <button onclick="wkAns2('خوب',this)" style="flex:1;padding:9px;border-radius:9px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;font-family:'Vazirmatn',sans-serif">خوب ✅</button>
+  <button onclick="wkAns2('متوسط',this)" style="flex:1;padding:9px;border-radius:9px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;font-family:'Vazirmatn',sans-serif">متوسط ➖</button>
+  <button onclick="wkAns2('ضعیف',this)" style="flex:1;padding:9px;border-radius:9px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;font-family:'Vazirmatn',sans-serif">ضعیف ❌</button>
+</div>
+<div style="font-size:13px;color:var(--text2);margin-bottom:7px">آیا این هدف تغییر کرده؟</div>
+<textarea id="wknote" rows="2" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:9px 11px;color:var(--text);font-family:'Vazirmatn',sans-serif;font-size:13px;resize:none;" placeholder="توضیح (اختیاری)..."></textarea>
+<button onclick="wkNext()" style="margin-top:9px;background:var(--accent);border:none;color:white;border-radius:9px;padding:9px 18px;font-family:'Vazirmatn',sans-serif;font-size:14px;cursor:pointer;width:100%">بعدی →</button>`;
+}
+function wkAns2(v,btn){window._wa=v;document.querySelectorAll('#wkBody button').forEach(b=>{b.style.borderColor='var(--border)';b.style.color='var(--text2)';});btn.style.borderColor='var(--accent)';btn.style.color='var(--accent)';}
+function wkNext(){
+  const note=document.getElementById('wknote')?.value||'';
+  const t=S.lt[wkIdx];const prog=window._wa||'متوسط';
+  wkAns.push({id:t.id,title:t.title,progress:prog,note});
+  t.updates=[...(t.updates||[]),{time:new Date().toISOString(),progress:prog,note}];
+  window._wa=null;wkIdx++;save();showWkStep();
+}
+async function analyzeWeek(){
+  S.lastWk=new Date().toISOString();save();
+  const sum=wkAns.map(a=>`${a.title}: ${a.progress}${a.note?' ('+a.note+')':''}`).join('\n');
+  showPage('insights',null);setNav('bn-ins');renderInsights();
+  document.getElementById('winsight').style.display='block';
+  document.getElementById('wtext').textContent='در حال تحلیل...';
+  try{
+    const txt=await callAI('یک دستیار فارسی‌زبان هستی.',`بررسی هفتگی:\n${sum}\n\nتحلیل کوتاه بده و پیشنهاد بده کدوم کار باید اولویت هفته بعد باشه. فارسی، مختصر.`,500);
+    document.getElementById('wtext').textContent=txt;
+  }catch(e){document.getElementById('wtext').textContent='خطا در اتصال.';}
+}
+
+let pStep=0,pData={};
+function showProd(){
+  pStep=0;pData={};
+  document.getElementById('pstep').textContent='چک‌این بازدهی — مرحله ۱/۳';
+  document.getElementById('pq').textContent='الان داری چیکار می‌کنی؟';
+  document.getElementById('rrow').style.display='none';
+  document.getElementById('pta').value='';
+  document.getElementById('pta').placeholder='مثلاً: دارم پایان‌نامه می‌نویسم...';
+  document.getElementById('pcard').classList.add('show');
+  document.getElementById('pcard').scrollIntoView({behavior:'smooth'});
+  window._pp=false;
+}
+function pickR(v,btn){pData.rating=v;document.querySelectorAll('.rbtn').forEach(b=>b.classList.remove('sel','good','bad'));btn.classList.add('sel');if(v==='خوب')btn.classList.add('good');if(v==='بد')btn.classList.add('bad');}
+async function nextProd(){
+  const text=document.getElementById('pta').value.trim();
+  if(pStep===0){if(!text)return;pData.activity=text;pStep=1;document.getElementById('pstep').textContent='چک‌این بازدهی — مرحله ۲/۳';document.getElementById('pq').textContent=`"${text}" — بازدهیت چطوره؟`;document.getElementById('rrow').style.display='flex';document.getElementById('pta').value='';document.getElementById('pta').placeholder='توضیح (اختیاری)...';return;}
+  if(pStep===1){if(!pData.rating){alert('یه گزینه انتخاب کن');return;}pData.extra=text;pStep=2;const g=pData.rating==='خوب',b=pData.rating==='بد';document.getElementById('pstep').textContent='چک‌این بازدهی — مرحله ۳/۳';document.getElementById('pq').textContent=g?'عالیه! چه شرایطی کمک کرد؟':b?'چرا داری بد کار می‌کنی؟':'چی می‌تونست بهتر بشه؟';document.getElementById('rrow').style.display='none';document.getElementById('pta').value='';document.getElementById('pta').placeholder='صادقانه بگو...';return;}
+  if(pStep===2){if(!text)return;pData.why=text;document.getElementById('pcard').classList.remove('show');S.logs.push({time:new Date().toISOString(),loc:S.curLoc?.n||'?',...pData});S.nxtProd=new Date(Date.now()+PROD_INT*60000).toISOString();window._pp=false;save();tickTimers();
+    document.getElementById('icard').classList.add('show');document.getElementById('itext').textContent='...';
+    try{const ls=S.logs.slice(-10).map(l=>`${l.loc}|${l.activity}|${l.rating}|${l.why}`).join('\n');const ins=await callAI('یک دستیار فارسی‌زبان هستی.',`تاریخچه:\n${ls}\n\nآخرین: ${pData.activity}|${pData.rating}|${pData.why}\n\nیک بینش (۲-۳ جمله) و یک پیشنهاد عملی. فارسی، مستقیم.`,350);document.getElementById('itext').textContent=ins;document.getElementById('icard').scrollIntoView({behavior:'smooth'});}catch(e){document.getElementById('itext').textContent='خطا.';}
+  }
+}
+
+function showNight(){
+  showPage('home',null);setNav('bn-night');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-home').classList.add('active');
+  const p=S.aiTasks.filter(t=>!t.done);
+  if(!p.length){alert('همه کارها انجام شدن! 🎉');return;}
+  document.getElementById('fbq').textContent=`"${p[0].title}" امروز انجام دادی؟ اگه نه، چرا نشد؟`;
+  document.getElementById('fbcard').classList.add('show');
+  document.getElementById('fbcard').scrollIntoView({behavior:'smooth'});
+}
+async function submitFb(){
+  const ans=document.getElementById('fbinp').value.trim();if(!ans)return;
+  document.getElementById('fbcard').classList.remove('show');document.getElementById('fbinp').value='';
+  const el=document.getElementById('tx');el.textContent=`فیدبک شبانه: ${ans}`;el.classList.add('ht');document.getElementById('sndBtn').disabled=false;
+  await processInput();
+}
+
+function renderInsights(){
+  const done=S.aiTasks.filter(t=>t.done).length,tot=S.aiTasks.length;
+  const good=S.logs.filter(l=>l.rating==='خوب').length;
+  const wkAgo=S.lastWk?Math.floor((Date.now()-new Date(S.lastWk))/(7*864e5)):null;
+  document.getElementById('sgrid').innerHTML=`
+    <div class="sbox"><div class="snum">${done}/${tot}</div><div class="slbl">کارهای انجام‌شده</div></div>
+    <div class="sbox"><div class="snum">${S.logs.length}</div><div class="slbl">چک‌این بازدهی</div></div>
+    <div class="sbox"><div class="snum">${good}</div><div class="slbl">جلسات خوب</div></div>
+    <div class="sbox"><div class="snum">${wkAgo===null?'—':wkAgo===0?'این هفته':wkAgo+' هفته'}</div><div class="slbl">آخرین مرور هفتگی</div></div>`;
+  if(S.logs.length){
+    document.getElementById('phist').style.display='block';
+    document.getElementById('phrows').innerHTML=S.logs.slice(-8).reverse().map(l=>{const c=l.rating==='خوب'?'good':l.rating==='بد'?'bad':'mid';return`<div class="phrow"><div class="phdot ${c}"></div><div class="phtxt">${l.activity}<br><span style="color:var(--text3)">${l.why}</span></div><div class="phtime">${new Date(l.time).toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'})}</div></div>`;}).join('');
+  }
+  if(S.logs.length>=3&&document.getElementById('wtext').textContent==='وقتی چند چک‌این داشتی، اینجا الگوهات رو می‌بینی.')analyzePatterns();
+}
+async function analyzePatterns(){
+  const ls=S.logs.slice(-15);if(!ls.length)return;
+  const text=ls.map(l=>`${l.loc}|${l.activity}|${l.rating}|${l.why}`).join('\n');
+  document.getElementById('winsight').style.display='block';document.getElementById('wtext').textContent='در حال تحلیل...';
+  try{const pat=await callAI('یک دستیار فارسی‌زبان هستی.',`تاریخچه:\n${text}\n\nالگوهای بازدهی رو تحلیل کن: چه زمان/مکانی بهتر کار می‌کنه؟ چه چیزی مانعش میشه؟ ۲ پیشنهاد عملی. فارسی.`,400);document.getElementById('wtext').textContent=pat;}catch(e){}
+}
+
+checkSetup();
+if(S.curLoc){document.getElementById('locIcon').textContent=S.curLoc.e;document.getElementById('locName').textContent=S.curLoc.n;}
+renderAi();renderDaily();renderLt();
+document.getElementById('nlinp').addEventListener('keydown',e=>{if(e.key==='Enter')addLoc();});
+document.getElementById('dinp').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();addDaily();}});
+document.getElementById('ltinp').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();addLt();}});
+
+function saveKey(){
+  const k=document.getElementById('keyInput').value.trim();
+  if(!k){alert('لطفاً key رو وارد کن.');return;}
+  localStorage.setItem('gemini_key',k);
+  document.getElementById('setupScreen').style.display='none';
+  alert('✅ Key ذخیره شد! حالا می‌تونی استفاده کنی.');
+}
+function checkSetup(){
+  if(!getKey()){
+    document.getElementById('setupScreen').style.display='flex';
+  }
+}
+
+</script>
+</body>
+</html>
