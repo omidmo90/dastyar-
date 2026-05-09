@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>دستیار هوشمند من</title>
+    <style>
+        :root {
+            --bg: #09090b; --card: #18181b; --accent: #8b5cf6; --text: #fafafa; --dim: #a1a1aa;
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg); color: var(--text);
+            margin: 0; padding: 15px; line-height: 1.6;
+        }
+        .container { max-width: 500px; margin: 0 auto; }
+        .card {
+            background: var(--card); border-radius: 16px;
+            padding: 20px; margin-bottom: 15px; border: 1px solid #27272a;
+        }
+        h2 { font-size: 1.2rem; margin-top: 0; color: var(--accent); }
+        input, textarea, select {
+            width: 100%; padding: 12px; margin: 8px 0;
+            background: #09090b; border: 1px solid #3f3f46;
+            border-radius: 8px; color: white; box-sizing: border-box;
+        }
+        button {
+            width: 100%; padding: 12px; border-radius: 8px; border: none;
+            background: var(--accent); color: white; font-weight: bold; cursor: pointer;
+        }
+        .status-chip {
+            display: inline-block; padding: 4px 10px; border-radius: 20px;
+            font-size: 0.8rem; background: #27272a; margin-bottom: 10px;
+        }
+        #ai-response {
+            font-size: 0.95rem; white-space: pre-wrap; border-right: 3px solid var(--accent);
+            padding-right: 15px; margin-top: 15px;
+        }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="setup-section" class="card">
+        <h2>تنظیمات اولیه</h2>
+        <p style="font-size: 0.8rem; color: var(--dim);">کلید API Gemini را وارد کنید:</p>
+        <input type="password" id="api-key" placeholder="AIzaSy...">
+        <button onclick="saveKey()">ذخیره و شروع</button>
+    </div>
+
+    <div id="main-app" class="hidden">
+        <div class="status-chip" id="current-status">منتظر ورودی شما...</div>
+        
+        <div class="card">
+            <h2>ورودی صوتی/متنی</h2>
+            <textarea id="user-input" rows="3" placeholder="مثلاً: الان تو میدون تجریشم، دارم میرم سمت خونه..."></textarea>
+            <button onclick="askAI()">تحلیل و پیشنهاد</button>
+        </div>
+
+        <div class="card">
+            <h2>پیشنهاد هوشمند</h2>
+            <div id="ai-response">سلام! من آماده‌ام تا بهت بگم الان بهترین کار چیه.</div>
+        </div>
+
+        <div class="card">
+            <h2>لیست کارها و همبستگی‌ها</h2>
+            <div id="task-list" style="font-size: 0.8rem; color: var(--dim);">لیست کارها خالی است.</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let userData = {
+        tasks: [],
+        logs: [],
+        correlations: {}
+    };
+
+    // بررسی وجود کلید در حافظه
+    window.onload = () => {
+        const savedKey = localStorage.getItem('gemini_key');
+        if (savedKey) {
+            document.getElementById('setup-section').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+        }
+    };
+
+    function saveKey() {
+        const key = document.getElementById('api-key').value;
+        if (key.length > 10) {
+            localStorage.setItem('gemini_key', key);
+            location.reload();
+        }
+    }
+
+    async function askAI() {
+        const userInput = document.getElementById('user-input').value;
+        const apiKey = localStorage.getItem('gemini_key');
+        const responseDiv = document.getElementById('ai-response');
+        
+        if (!userInput) return;
+        
+        responseDiv.innerText = "در حال فکر کردن...";
+
+        const prompt = `
+        تو یک دستیار هوشمند هستی. 
+        اطلاعات کاربر: ${userInput}
+        وظیفه: بر اساس این ورودی و با در نظر گرفتن "همبستگی" بین کارها، "سود" و "شانس موفقیت"، بهترین کار بعدی را پیشنهاد بده.
+        پاسخ را کوتاه و عملیاتی به زبان فارسی بنویس.
+        `;
+
+        try {
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }]
+                })
+            });
+            
+            const data = await response.json();
+            const aiText = data.candidates[0].content.parts[0].text;
+            responseDiv.innerText = aiText;
+            
+            // ذخیره در لاگ برای یادگیری بعدی
+            userData.logs.push({time: new Date(), input: userInput, output: aiText});
+            console.log("Data Updated:", userData);
+            
+        } catch (error) {
+            responseDiv.innerText = "خطا در برقراری ارتباط. کلید API را چک کنید.";
+        }
+    }
+</script>
+
+</body>
+</html>
